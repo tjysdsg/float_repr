@@ -1,10 +1,10 @@
-#include <iostream>
 #include <bitset>
 #include <cassert>
 #include <cmath>
+#include <iostream>
 
-using std::cout;
 using std::cerr;
+using std::cout;
 
 const uint32_t EXPONENT_MASK = 0x7F800000;
 const uint32_t EXPONENT_START = 23;
@@ -14,17 +14,16 @@ const uint32_t FRACTION_MASK = 0x7FFFFF;
 const uint32_t FRACTION_START = 0;
 const uint32_t FRACTION_END = 23;
 
-std::bitset<sizeof(uint32_t) * 8> as_bits(uint32_t val) {
-  return {val};
-}
+std::bitset<sizeof(uint32_t) * 8> as_bits(uint32_t val) { return {val}; }
 
 void print_exponent(std::bitset<sizeof(uint32_t) * 8> bits) {
-  for (int i = EXPONENT_END - 1; i >= (int) EXPONENT_START; --i) {
+  for (int i = EXPONENT_END - 1; i >= (int)EXPONENT_START; --i) {
     cout << bits[i];
   }
 }
+
 void print_fraction(std::bitset<sizeof(uint32_t) * 8> bits) {
-  for (int i = FRACTION_END - 1; i >= (int) FRACTION_START; --i) {
+  for (int i = FRACTION_END - 1; i >= (int)FRACTION_START; --i) {
     cout << bits[i];
   }
 }
@@ -34,7 +33,7 @@ int main(int argc, char **argv) {
     cerr << argv[0] << " num\n";
     return 1;
   }
-  assert(sizeof(float) == sizeof(uint32_t));
+  static_assert(sizeof(float) == sizeof(uint32_t));
 
   union {
     float f;
@@ -45,6 +44,8 @@ int main(int argc, char **argv) {
   data.f = std::stof(std::string(argv[1]));
   auto bits = as_bits(data.i);
 
+  cout << "The number is " << data.f << '\n';
+
   // print float as bits
   cout << "" << bits[31] << ' ';
   print_exponent(bits);
@@ -54,14 +55,11 @@ int main(int argc, char **argv) {
 
   // explain sign
   cout << "The sign bit is " << bits[31] << ", so the number is ";
-  if (bits[31])
-    cout << "negative\n";
-  else
-    cout << "positive\n";
+  cout << (bits[31] ? "negative\n" : "positive\n");
 
   // explain exponent
   int expo = (data.i & EXPONENT_MASK) >> EXPONENT_START;
-  cout << "Exponent = " << expo;
+  cout << "Exp = " << expo;
   expo -= 127;
   cout << " - 127 = " << expo << '\n';
 
@@ -77,7 +75,7 @@ int main(int argc, char **argv) {
     ++curr_expo;
   }
   float frac = base;
-  cout << "The number = 1 * 2^" << expo << " (prepended 1)";
+  cout << "Fraction = 1 * 2^" << expo << " (prepended 1)";
 
   curr_expo = expo - 1;
   base /= 2;
@@ -94,5 +92,8 @@ int main(int argc, char **argv) {
   }
 
   cout << " = " << frac << '\n';
+
+  cout << "num = " << frac << " * 2^" << expo << " = "
+       << pow(2, expo) * frac << '\n';
   return 0;
 }
