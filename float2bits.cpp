@@ -53,39 +53,59 @@ int main(int argc, char **argv) {
   print_fraction(bits);
   cout << "\nS    E               F            \n";
 
-  // explain sign
+  int expo = (data.i & EXPONENT_MASK) >> EXPONENT_START;
+  uint32_t fraction = data.i & FRACTION_MASK;
+
+  // sign
   cout << "The sign bit is " << bits[31] << ", so the number is ";
   cout << (bits[31] ? "negative\n" : "positive\n");
 
-  // explain exponent
-  int expo = (data.i & EXPONENT_MASK) >> EXPONENT_START;
+  // exponent
+
+  // two special cases
+  if (expo == 0xFF) {
+    if (fraction == 0) {
+      cout << "Infinity\n";
+    } else {
+      cout << "NaN\n";
+    }
+    return 0;
+  }
+
+  bool normalized = true;
+  if (expo == 0) {
+    cout << "num is denormalized\n";
+    expo = 1;
+    normalized = false;
+  } else {
+    cout << "num is normalized\n";
+    normalized = true;
+  }
+
   cout << "Exp = " << expo;
   expo -= 127;
   cout << " - 127 = " << expo << '\n';
 
-  // explain fraction
-  uint32_t fraction = data.i & FRACTION_MASK;
+  // fraction
   auto fraction_bits = as_bits(fraction);
 
-  // find the base for the highest digit
   float base = 1;
-  int curr_expo = expo;
-  while (curr_expo < 0) {
-    base /= 2;
-    ++curr_expo;
-  }
   float frac = base;
-  cout << "Fraction = 1 * 2^" << expo << " (prepended 1)";
+  if (normalized) {
+    cout << "Fraction = 1 * 2^0";
+  } else {
+    frac = 0;
+    cout << "Fraction = 0 * 2^0";
+  }
 
-  curr_expo = expo - 1;
   base /= 2;
+  int curr_expo = -1;
   uint32_t fraction_n_bits = FRACTION_END - FRACTION_START;
   for (int i = fraction_n_bits - 1; i >= 0; --i) {
     if (fraction_bits[i]) {
       cout << " + 1 * 2^";
-      cout << curr_expo << " (the " << i + 1 << "-th bit)";
+      cout << curr_expo; // << " (the " << i + 1 << "-th bit)";
     }
-
     frac += fraction_bits[i] * base;
     base /= 2;
     --curr_expo;
@@ -93,7 +113,7 @@ int main(int argc, char **argv) {
 
   cout << " = " << frac << '\n';
 
-  cout << "num = " << frac << " * 2^" << expo << " = "
-       << pow(2, expo) * frac << '\n';
+  cout << "num = " << frac << " * 2^" << expo << " = " << pow(2, expo) * frac
+       << '\n';
   return 0;
 }
