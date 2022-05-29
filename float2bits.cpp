@@ -2,19 +2,16 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include "utils.h"
 
 using std::cerr;
 using std::cout;
 
-const uint32_t EXPONENT_MASK = 0x7F800000;
 const uint32_t EXPONENT_START = 23;
 const uint32_t EXPONENT_END = 31;
 
-const uint32_t FRACTION_MASK = 0x7FFFFF;
 const uint32_t FRACTION_START = 0;
 const uint32_t FRACTION_END = 23;
-
-std::bitset<sizeof(uint32_t) * 8> as_bits(uint32_t val) { return {val}; }
 
 void print_exponent(std::bitset<sizeof(uint32_t) * 8> bits) {
   for (int i = EXPONENT_END - 1; i >= (int)EXPONENT_START; --i) {
@@ -53,8 +50,8 @@ int main(int argc, char **argv) {
   print_fraction(bits);
   cout << "\nS    E               F            \n";
 
-  int expo = (data.i & EXPONENT_MASK) >> EXPONENT_START;
-  uint32_t fraction = data.i & FRACTION_MASK;
+  int expo = (data.i & FP32_EXPONENT_MASK) >> EXPONENT_START;
+  uint32_t fraction = data.i & FP32_FRACTION_MASK;
 
   // sign
   cout << "The sign bit is " << bits[31] << ", so the number is ";
