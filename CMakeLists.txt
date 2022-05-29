@@ -10,3 +10,6 @@ target_link_libraries(utils PUBLIC m)
 
 add_executable(float2bits float2bits.cpp)
 target_link_libraries(float2bits utils)
+
+add_executable(float2double float2double.cpp)
+target_link_libraries(float2double utils)
